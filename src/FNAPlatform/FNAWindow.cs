@@ -91,6 +91,7 @@ namespace Microsoft.Xna.Framework
 		private IntPtr window;
 		private string deviceName;
 		private bool wantsFullscreen;
+		private bool hardwareFullscreen;
 
 		#endregion
 
@@ -101,15 +102,18 @@ namespace Microsoft.Xna.Framework
 			window = nativeWindow;
 			deviceName = display;
 			wantsFullscreen = false;
+			hardwareFullscreen = false;
 		}
 
 		#endregion
 
 		#region Public GameWindow Methods
 
-		public override void BeginScreenDeviceChange(bool willBeFullScreen)
-		{
+		public override void BeginScreenDeviceChange(
+			bool willBeFullScreen, bool willBeHardwareFullScreen
+		) {
 			wantsFullscreen = willBeFullScreen;
+			hardwareFullscreen = willBeHardwareFullScreen;
 		}
 
 		public override void EndScreenDeviceChange(
@@ -123,6 +127,7 @@ namespace Microsoft.Xna.Framework
 				clientWidth,
 				clientHeight,
 				wantsFullscreen,
+				hardwareFullscreen,
 				screenDeviceName,
 				ref deviceName
 			);

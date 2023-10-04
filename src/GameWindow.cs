@@ -108,7 +108,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Methods
 
-		public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
+		public abstract void BeginScreenDeviceChange(
+			bool willBeFullScreen, bool willBeHardwareFullScreen
+		);
 
 		public abstract void EndScreenDeviceChange(
 			string screenDeviceName,

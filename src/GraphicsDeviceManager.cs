@@ -34,6 +34,20 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		private bool INTERNAL_hardwareFullscreen;
+		public bool HardwareFullscreenEXT
+		{
+			get
+			{
+				return INTERNAL_hardwareFullscreen;
+			}
+			set
+			{
+				INTERNAL_hardwareFullscreen = value;
+				prefsChanged = true;
+			}
+		}
+
 		private bool INTERNAL_isFullScreen;
 		public bool IsFullScreen
 		{
@@ -305,7 +319,8 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 			game.Window.BeginScreenDeviceChange(
-				gdi.PresentationParameters.IsFullScreen
+				gdi.PresentationParameters.IsFullScreen,
+				INTERNAL_hardwareFullscreen
 			);
 			game.Window.EndScreenDeviceChange(
 				gdi.Adapter.DeviceName,
@@ -532,7 +547,8 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 			game.Window.BeginScreenDeviceChange(
-				gdi.PresentationParameters.IsFullScreen
+				gdi.PresentationParameters.IsFullScreen,
+				INTERNAL_hardwareFullscreen
 			);
 			game.Window.EndScreenDeviceChange(
 				gdi.Adapter.DeviceName,

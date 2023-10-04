@@ -540,6 +540,7 @@ namespace Microsoft.Xna.Framework
 			int clientWidth,
 			int clientHeight,
 			bool wantsFullscreen,
+			bool hardwareFullscreen,
 			string screenDeviceName,
 			ref string resultDeviceName
 		) {
@@ -555,7 +556,9 @@ namespace Microsoft.Xna.Framework
 			if (!wantsFullscreen)
 			{
 				bool resize = false;
-				if ((SDL.SDL_GetWindowFlags(window) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0)
+				uint flags = SDL.SDL_GetWindowFlags(window);
+				if (((flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN) != 0) ||
+					((flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP) != 0))
 				{
 					SDL.SDL_SetWindowFullscreen(window, 0);
 					resize = true;
@@ -611,7 +614,8 @@ namespace Microsoft.Xna.Framework
 			// Set fullscreen after we've done all the ugly stuff.
 			if (wantsFullscreen)
 			{
-				if ((SDL.SDL_GetWindowFlags(window) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN) == 0)
+				if (((SDL.SDL_GetWindowFlags(window) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN) == 0) ||
+					hardwareFullscreen)
 				{
 					/* If we're still hidden, we can't actually go fullscreen yet.
 					 * But, we can at least set the hidden window size to match
@@ -623,12 +627,38 @@ namespace Microsoft.Xna.Framework
 						displayIndex,
 						out mode
 					);
+					if (hardwareFullscreen)
+					{
+						bool fullscreenModeFound = false;
+						SDL.SDL_DisplayMode closest = mode;
+						int numModes = SDL.SDL_GetNumDisplayModes(displayIndex);
+						for (int i = numModes - 1; i >= 0; i -= 1)
+						{
+							SDL.SDL_DisplayMode filler;
+							SDL.SDL_GetDisplayMode(displayIndex, i, out filler);
+							if (filler.w == clientWidth &&
+								filler.h == clientHeight)
+							{
+								if (filler.refresh_rate == mode.refresh_rate ||
+									!fullscreenModeFound)
+								{
+									fullscreenModeFound = true;
+									closest = filler;
+								}
+							}
+						}
+						if (fullscreenModeFound)
+						{
+							mode = closest;
+							SDL.SDL_SetWindowDisplayMode(window, ref mode);
+						}
+					}
 					SDL.SDL_SetWindowSize(window, mode.w, mode.h);
 				}
-				SDL.SDL_SetWindowFullscreen(
-					window,
-					(uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP
-				);
+				var windowFlags = hardwareFullscreen ?
+					SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN :
+					SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
+				SDL.SDL_SetWindowFullscreen(window, (uint) windowFlags);
 			}
 
 			// Update the mouse window bounds
